@@ -1,9 +1,0 @@
-{
-	"nodes":[
-		{"id":"b8466cd85ee142c7","x":-280,"y":-220,"width":250,"height":60,"type":"text","text":"this is a test note"},
-		{"id":"9b897c61b611ebe1","x":-230,"y":-60,"width":400,"height":400,"type":"file","file":"content/adding a note here to try things out.md"}
-	],
-	"edges":[
-		{"id":"c2614096e3c59669","fromNode":"b8466cd85ee142c7","fromSide":"bottom","toNode":"9b897c61b611ebe1","toSide":"top"}
-	]
-}
