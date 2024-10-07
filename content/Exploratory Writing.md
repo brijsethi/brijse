@@ -1,6 +1,6 @@
 ---
 title: Exploratory Writing
-draft: false
+draft: true
 date: 2024-03-07
 tags:
 ---
