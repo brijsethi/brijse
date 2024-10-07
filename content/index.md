@@ -10,11 +10,12 @@ one more thing -
 
 ```mermaid
 	mindmap
-		one thing leads to another and then there is dooms day
-			some things are better left unsaid
+		root
+			one thing leads to another and then there is dooms day
+				some things are better left unsaid
 			if you have to say it then say it a few times and then a few more times
-				one
-				two
-				three
+					one
+					two
+					three
 			four
 ```
