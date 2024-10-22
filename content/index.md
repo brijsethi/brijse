@@ -1,21 +1,38 @@
 ---
 title: Brij Se
 ---
-[[Exploratory Writing]] 
+100 day projects
 
-This is a blank Quartz installation.
-See the [documentation](https://quartz.jzhao.xyz) for how to get started.
-
-one more thing - 
+HeHeHa is head heart hands - used well!
 
 ```mermaid
 	mindmap
-		root
-			one thing leads to another and then there is dooms day
-				some things are better left unsaid
-			if you have to say it then say it a few times and then a few more times
-					one
-					two
-					three
-			four
+		heheha
+			head
+				create content
+					make notes
+					use AI prompts
+					publish
+				get things done
+					100 day projects
+					Tasks today
+					Say No
+			heart
+				prayer
+					Japa
+					Ardas
+					Sewa
+				care
+					self
+					strong ties
+					purpose
+			hands
+				process work
+					persist
+					strong ties
+					specific to situation
+				energy work
+					cleanse
+					energize
+					recharge
 ```
