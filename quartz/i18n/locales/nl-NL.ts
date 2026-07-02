@@ -6,6 +6,21 @@ export default {
     description: "Geen beschrijving gegeven.",
   },
   components: {
+    callout: {
+      note: "Notitie",
+      abstract: "Samenvatting",
+      info: "Info",
+      todo: "Te doen",
+      tip: "Tip",
+      success: "Succes",
+      question: "Vraag",
+      warning: "Waarschuwing",
+      failure: "Mislukking",
+      danger: "Gevaar",
+      bug: "Bug",
+      example: "Voorbeeld",
+      quote: "Citaat",
+    },
     backlinks: {
       title: "Backlinks",
       noBacklinksFound: "Geen backlinks gevonden",
@@ -13,6 +28,9 @@ export default {
     themeToggle: {
       lightMode: "Lichte modus",
       darkMode: "Donkere modus",
+    },
+    readerMode: {
+      title: "Leesmodus",
     },
     explorer: {
       title: "Verkenner",
@@ -38,6 +56,10 @@ export default {
     tableOfContents: {
       title: "Inhoudsopgave",
     },
+    contentMeta: {
+      readingTime: ({ minutes }) =>
+        minutes === 1 ? "1 minuut leestijd" : `${minutes} minuten leestijd`,
+    },
   },
   pages: {
     rss: {
@@ -47,11 +69,12 @@ export default {
     error: {
       title: "Niet gevonden",
       notFound: "Deze pagina is niet zichtbaar of bestaat niet.",
+      home: "Keer terug naar de start pagina",
     },
     folderContent: {
       folder: "Map",
       itemsUnderFolder: ({ count }) =>
-        count === 1 ? "1 item in deze map" : `${count} items in deze map.`,
+        count === 1 ? "1 item in deze map." : `${count} items in deze map.`,
     },
     tagContent: {
       tag: "Label",

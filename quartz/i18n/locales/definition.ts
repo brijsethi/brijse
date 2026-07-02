@@ -1,11 +1,29 @@
 import { FullSlug } from "../../util/path"
 
+export interface CalloutTranslation {
+  note: string
+  abstract: string
+  info: string
+  todo: string
+  tip: string
+  success: string
+  question: string
+  warning: string
+  failure: string
+  danger: string
+  bug: string
+  example: string
+  quote: string
+}
+
 export interface Translation {
   propertyDefaults: {
     title: string
     description: string
   }
+  direction?: "ltr" | "rtl"
   components: {
+    callout: CalloutTranslation
     backlinks: {
       title: string
       noBacklinksFound: string
@@ -13,6 +31,9 @@ export interface Translation {
     themeToggle: {
       lightMode: string
       darkMode: string
+    }
+    readerMode: {
+      title: string
     }
     explorer: {
       title: string
@@ -38,6 +59,9 @@ export interface Translation {
     tableOfContents: {
       title: string
     }
+    contentMeta: {
+      readingTime: (variables: { minutes: number }) => string
+    }
   }
   pages: {
     rss: {
@@ -47,6 +71,7 @@ export interface Translation {
     error: {
       title: string
       notFound: string
+      home: string
     }
     folderContent: {
       folder: string

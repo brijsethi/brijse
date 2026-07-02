@@ -6,13 +6,31 @@ export default {
     description: "Keine Beschreibung angegeben",
   },
   components: {
+    callout: {
+      note: "Hinweis",
+      abstract: "Zusammenfassung",
+      info: "Info",
+      todo: "Zu erledigen",
+      tip: "Tipp",
+      success: "Erfolg",
+      question: "Frage",
+      warning: "Warnung",
+      failure: "Fehlgeschlagen",
+      danger: "Gefahr",
+      bug: "Fehler",
+      example: "Beispiel",
+      quote: "Zitat",
+    },
     backlinks: {
       title: "Backlinks",
       noBacklinksFound: "Keine Backlinks gefunden",
     },
     themeToggle: {
-      lightMode: "Light Mode",
-      darkMode: "Dark Mode",
+      lightMode: "Heller Modus",
+      darkMode: "Dunkler Modus",
+    },
+    readerMode: {
+      title: "Lesemodus",
     },
     explorer: {
       title: "Explorer",
@@ -38,6 +56,9 @@ export default {
     tableOfContents: {
       title: "Inhaltsverzeichnis",
     },
+    contentMeta: {
+      readingTime: ({ minutes }) => `${minutes} Min. Lesezeit`,
+    },
   },
   pages: {
     rss: {
@@ -47,17 +68,18 @@ export default {
     error: {
       title: "Nicht gefunden",
       notFound: "Diese Seite ist entweder nicht öffentlich oder existiert nicht.",
+      home: "Zur Startseite",
     },
     folderContent: {
       folder: "Ordner",
       itemsUnderFolder: ({ count }) =>
-        count === 1 ? "1 Datei in diesem Ordner" : `${count} Dateien in diesem Ordner.`,
+        count === 1 ? "1 Datei in diesem Ordner." : `${count} Dateien in diesem Ordner.`,
     },
     tagContent: {
       tag: "Tag",
       tagIndex: "Tag-Übersicht",
       itemsUnderTag: ({ count }) =>
-        count === 1 ? "1 Datei mit diesem Tag" : `${count} Dateien mit diesem Tag.`,
+        count === 1 ? "1 Datei mit diesem Tag." : `${count} Dateien mit diesem Tag.`,
       showingFirst: ({ count }) => `Die ersten ${count} Tags werden angezeigt.`,
       totalTags: ({ count }) => `${count} Tags insgesamt.`,
     },

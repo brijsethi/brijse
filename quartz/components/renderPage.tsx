@@ -1,25 +1,30 @@
 import { render } from "preact-render-to-string"
 import { QuartzComponent, QuartzComponentProps } from "./types"
-import HeaderConstructor from "./Header"
 import BodyConstructor from "./Body"
 import { JSResourceToScriptElement, StaticResources } from "../util/resources"
 import { FullSlug, RelativeURL, joinSegments, normalizeHastElement } from "../util/path"
+import { clone } from "../util/clone"
 import { visit } from "unist-util-visit"
 import { Root, Element, ElementContent } from "hast"
-import { QuartzPluginData } from "../plugins/vfile"
 import { GlobalConfiguration } from "../cfg"
 import { i18n } from "../i18n"
+import { styleText } from "util"
+import { resolveFrame } from "./frames"
+import type { TreeTransform } from "../plugins/types"
 
 interface RenderComponents {
   head: QuartzComponent
   header: QuartzComponent[]
   beforeBody: QuartzComponent[]
   pageBody: QuartzComponent
+  afterBody: QuartzComponent[]
   left: QuartzComponent[]
   right: QuartzComponent[]
   footer: QuartzComponent
+  frame?: string
 }
 
+const headerRegex = new RegExp(/h[1-6]/)
 export function pageResources(
   baseDir: FullSlug | RelativeURL,
   staticResources: StaticResources,
@@ -27,8 +32,13 @@ export function pageResources(
   const contentIndexPath = joinSegments(baseDir, "static/contentIndex.json")
   const contentIndexScript = `const fetchData = fetch("${contentIndexPath}").then(data => data.json())`
 
-  return {
-    css: [joinSegments(baseDir, "index.css"), ...staticResources.css],
+  const resources: StaticResources = {
+    css: [
+      {
+        content: joinSegments(baseDir, "index.css"),
+      },
+      ...staticResources.css,
+    ],
     js: [
       {
         src: joinSegments(baseDir, "prescript.js"),
@@ -42,43 +52,71 @@ export function pageResources(
         script: contentIndexScript,
       },
       ...staticResources.js,
-      {
-        src: joinSegments(baseDir, "postscript.js"),
-        loadTime: "afterDOMReady",
-        moduleType: "module",
-        contentType: "external",
-      },
     ],
-  }
-}
-
-let pageIndex: Map<FullSlug, QuartzPluginData> | undefined = undefined
-function getOrComputeFileIndex(allFiles: QuartzPluginData[]): Map<FullSlug, QuartzPluginData> {
-  if (!pageIndex) {
-    pageIndex = new Map()
-    for (const file of allFiles) {
-      pageIndex.set(file.slug!, file)
-    }
+    additionalHead: staticResources.additionalHead,
   }
 
-  return pageIndex
+  resources.js.push({
+    src: joinSegments(baseDir, "postscript.js"),
+    loadTime: "afterDOMReady",
+    moduleType: "module",
+    contentType: "external",
+  })
+
+  return resources
 }
 
-export function renderPage(
+function renderTranscludes(
+  root: Root,
   cfg: GlobalConfiguration,
   slug: FullSlug,
   componentData: QuartzComponentProps,
-  components: RenderComponents,
-  pageResources: StaticResources,
-): string {
+  visited: Set<FullSlug>,
+) {
   // process transcludes in componentData
-  visit(componentData.tree as Root, "element", (node, _index, _parent) => {
+  visit(root, "element", (node, _index, _parent) => {
     if (node.tagName === "blockquote") {
       const classNames = (node.properties?.className ?? []) as string[]
       if (classNames.includes("transclude")) {
         const inner = node.children[0] as Element
-        const transcludeTarget = inner.properties["data-slug"] as FullSlug
-        const page = getOrComputeFileIndex(componentData.allFiles).get(transcludeTarget)
+        const transcludeTarget = (inner.properties["data-slug"] ?? slug) as FullSlug
+        if (visited.has(transcludeTarget)) {
+          console.warn(
+            styleText(
+              "yellow",
+              `Warning: Skipping circular transclusion: ${slug} -> ${transcludeTarget}`,
+            ),
+          )
+          node.children = [
+            {
+              type: "element",
+              tagName: "p",
+              properties: { style: "color: var(--secondary);" },
+              children: [
+                {
+                  type: "text",
+                  value: `Circular transclusion detected: ${transcludeTarget}`,
+                },
+              ],
+            },
+          ]
+          return
+        }
+        visited.add(transcludeTarget)
+
+        let page = componentData.allFiles.find((f) => f.slug === transcludeTarget)
+        if (!page) {
+          // Virtual pages from PageType plugins have slugs without extensions
+          // (e.g. "plugins/CanvasPage") but CrawlLinks resolves wikilinks like
+          // ![[CanvasPage.canvas]] to "plugins/CanvasPage.canvas". Fall back to
+          // stripping the extension from the transclude target.
+          const dotIdx = transcludeTarget.lastIndexOf(".")
+          const slashIdx = transcludeTarget.lastIndexOf("/")
+          if (dotIdx > slashIdx + 1) {
+            const stripped = transcludeTarget.slice(0, dotIdx) as FullSlug
+            page = componentData.allFiles.findLast((f) => f.slug === stripped)
+          }
+        }
         if (!page) {
           return
         }
@@ -103,7 +141,7 @@ export function renderPage(
               {
                 type: "element",
                 tagName: "a",
-                properties: { href: inner.properties?.href, class: ["internal"] },
+                properties: { href: inner.properties?.href, class: ["internal", "transclude-src"] },
                 children: [
                   { type: "text", value: i18n(cfg.locale).components.transcludes.linkToOriginal },
                 ],
@@ -114,18 +152,24 @@ export function renderPage(
           // header transclude
           blockRef = blockRef.slice(1)
           let startIdx = undefined
+          let startDepth = undefined
           let endIdx = undefined
           for (const [i, el] of page.htmlAst.children.entries()) {
-            if (el.type === "element" && el.tagName.match(/h[1-6]/)) {
-              if (endIdx) {
-                break
-              }
+            // skip non-headers
+            if (!(el.type === "element" && el.tagName.match(headerRegex))) continue
+            const depth = Number(el.tagName.substring(1))
 
-              if (startIdx !== undefined) {
-                endIdx = i
-              } else if (el.properties?.id === blockRef) {
+            // lookin for our blockref
+            if (startIdx === undefined || startDepth === undefined) {
+              // skip until we find the blockref that matches
+              if (el.properties?.id === blockRef) {
                 startIdx = i
+                startDepth = depth
               }
+            } else if (depth <= startDepth) {
+              // looking for new header that is same level or higher
+              endIdx = i
+              break
             }
           }
 
@@ -140,7 +184,7 @@ export function renderPage(
             {
               type: "element",
               tagName: "a",
-              properties: { href: inner.properties?.href, class: ["internal"] },
+              properties: { href: inner.properties?.href, class: ["internal", "transclude-src"] },
               children: [
                 { type: "text", value: i18n(cfg.locale).components.transcludes.linkToOriginal },
               ],
@@ -170,7 +214,7 @@ export function renderPage(
             {
               type: "element",
               tagName: "a",
-              properties: { href: inner.properties?.href, class: ["internal"] },
+              properties: { href: inner.properties?.href, class: ["internal", "transclude-src"] },
               children: [
                 { type: "text", value: i18n(cfg.locale).components.transcludes.linkToOriginal },
               ],
@@ -180,65 +224,74 @@ export function renderPage(
       }
     }
   })
+}
+
+export function renderPage(
+  cfg: GlobalConfiguration,
+  slug: FullSlug,
+  componentData: QuartzComponentProps,
+  components: RenderComponents,
+  pageResources: StaticResources,
+  treeTransforms?: TreeTransform[],
+): string {
+  // make a deep copy of the tree so we don't remove the transclusion references
+  // for the file cached in contentMap in build.ts
+  const root = clone(componentData.tree) as Root
+  const visited = new Set<FullSlug>([slug])
+  renderTranscludes(root, cfg, slug, componentData, visited)
+
+  // Run plugin-provided tree transforms (e.g. resolving inline bases codeblocks)
+  if (treeTransforms) {
+    for (const transform of treeTransforms) {
+      transform(root, slug, componentData)
+    }
+  }
+
+  // set componentData.tree to the edited html that has transclusions rendered
+  componentData.tree = root
 
   const {
     head: Head,
     header,
     beforeBody,
     pageBody: Content,
+    afterBody,
     left,
     right,
     footer: Footer,
+    frame: frameName,
   } = components
-  const Header = HeaderConstructor()
   const Body = BodyConstructor()
+  const frame = resolveFrame(frameName)
 
-  const LeftComponent = (
-    <div class="left sidebar">
-      {left.map((BodyComponent) => (
-        <BodyComponent {...componentData} />
-      ))}
-    </div>
-  )
-
-  const RightComponent = (
-    <div class="right sidebar">
-      {right.map((BodyComponent) => (
-        <BodyComponent {...componentData} />
-      ))}
-    </div>
-  )
-
+  const lang = componentData.fileData.frontmatter?.lang ?? cfg.locale?.split("-")[0] ?? "en"
+  const direction = i18n(cfg.locale).direction ?? "ltr"
   const doc = (
-    <html>
+    <html lang={lang} dir={direction}>
       <Head {...componentData} />
       <body data-slug={slug}>
-        <div id="quartz-root" class="page">
+        {frame.css && <style dangerouslySetInnerHTML={{ __html: frame.css }} />}
+        <div id="quartz-root" class="page" data-frame={frame.name}>
           <Body {...componentData}>
-            {LeftComponent}
-            <div class="center">
-              <div class="page-header">
-                <Header {...componentData}>
-                  {header.map((HeaderComponent) => (
-                    <HeaderComponent {...componentData} />
-                  ))}
-                </Header>
-                <div class="popover-hint">
-                  {beforeBody.map((BodyComponent) => (
-                    <BodyComponent {...componentData} />
-                  ))}
-                </div>
-              </div>
-              <Content {...componentData} />
-            </div>
-            {RightComponent}
+            {[
+              frame.render({
+                componentData,
+                head: Head,
+                header,
+                beforeBody,
+                pageBody: Content,
+                afterBody,
+                left,
+                right,
+                footer: Footer,
+              }),
+            ]}
           </Body>
-          <Footer {...componentData} />
         </div>
       </body>
       {pageResources.js
         .filter((resource) => resource.loadTime === "afterDOMReady")
-        .map((res) => JSResourceToScriptElement(res))}
+        .map((res) => JSResourceToScriptElement(res, true))}
     </html>
   )
 
