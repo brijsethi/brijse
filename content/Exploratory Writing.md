@@ -1,10 +1,11 @@
 ---
 title: Exploratory Writing
-draft: true
+draft: false
 date: 2024-03-07
 tags:
 ---
-What can I pitch to Sanjay Jain
+What can I pitch to an ==engineering college principal== 
+
 - gap year instruction
 - addressing motivation 
 	- passion @work
