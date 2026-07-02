@@ -2,7 +2,8 @@
 title: Brij Se
 ---
 [[SGGS]]
-**and then there was light**
+
+some things linger and persist
 
 100 day projects
 
