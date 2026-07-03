@@ -2,8 +2,11 @@
 title: Brij Se
 ---
 See - 
-[[content/wiki/index|wiki index]]
+[[content/wiki/index|index]]
+[[wiki/index]]
 [[log]]
+[[wiki/log]]
+[[Karpathy s claude-md file - updated]]
 
 Some files that are not in the wiki folder - 
-[[pushing local changes from obsidian vault brijse to brijse.com]]
+[[getting started · maestemy-2nd-brain for obsidian]]
