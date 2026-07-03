@@ -5,6 +5,7 @@ the URLs into `raw/web/`. Check items after fetching.
 
 ## To process
 
+
 <!-- Add URLs here as a task list:
 - [ ] https://example.com/article
 - [ ] https://arxiv.org/abs/2024.12345
@@ -13,3 +14,7 @@ the URLs into `raw/web/`. Check items after fetching.
 ## Done
 
 <!-- Automatically moved here after fetch. -->
+
+## Processati
+
+- [x] https://agilitystories.substack.com/p/tinker-tinker-tinker → `/Users/brijsethi/obsidian/brijse/content/raw/web/tinker-tinker-tinker` (2026-07-03)
