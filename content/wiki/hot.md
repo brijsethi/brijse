@@ -12,17 +12,21 @@ Read by the agent at session start.
 
 ## Recent sessions
 
-- 2026-07-03: Installed the vault into `content/` (public repo, `wiki/` publishes,
-  `raw/`/`conversations/`/`.lint/`/`.claude/` excluded from the Quartz build). Along the
-  way, migrated the site itself from Quartz v4.2.2 to v5.0.0 and fixed the Cloudflare
-  build command that was silently breaking the deploy. See
-  `conversations/2026-07-03-quartz-v5-and-vault-setup.md` for the full account.
+- 2026-07-03: First real INGEST. Four raw files (three test notes the user dropped in
+  manually to see cross-linking in action, plus a web clip of the my-2nd-brain tool's
+  own getting-started guide) became 4 sources + 4 pages: `100-days-action-plan`
+  (genuine cross-link between two unrelated notes), `heheha-framework`,
+  `ai-fluency` (deliberately thin stub, tracked focus area), `my-ai-setup` (the two
+  tooling sources). User confirmed already committed+pushed the vault scaffold itself
+  (via GitHub Desktop) earlier — `brijse.com` unaffected since `raw/`/`wiki/` etc. are
+  excluded from the Quartz build via `ignorePatterns`.
 
 ## Open threads
 
-- No real content in the vault yet — user is bringing actual content "tomorrow."
-- Agility Stories (originally the planned test content) is likely *not* going into the
-  wiki as digested summaries — user wants stories read intact, possibly as a separate
-  un-digested site section later instead.
-- Vault scaffold at `content/` is committed locally but **not pushed** yet — holding
-  off until real content exists.
+- User may delete the 3 test-note sources/pages later if they turn out redundant —
+  they were added to trial the ingest/cross-linking flow, not as real content.
+- Real first content for the vault still to come from the user.
+- Agility Stories are *not* going into the wiki as digested summaries — user wants
+  stories read intact, possibly as a separate un-digested site section later instead.
+- User is prioritizing "AI Fluency" as a growth area going forward — watch for new
+  sources that should attach to `[[wiki/pages/ai-fluency]]` / `[[wiki/pages/my-ai-setup]]`.

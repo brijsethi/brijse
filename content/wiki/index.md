@@ -4,11 +4,17 @@ Catalog of the vault. Updated on every write operation.
 
 ## Pages
 
-<!-- Will be populated as you ingest content. -->
+- [[wiki/pages/100-days-action-plan]]
+- [[wiki/pages/heheha-framework]]
+- [[wiki/pages/ai-fluency]]
+- [[wiki/pages/my-ai-setup]]
 
 ## Sources
 
-<!-- One entry per source. -->
+- [[wiki/sources/exploratory-writing]]
+- [[wiki/sources/heheha]]
+- [[wiki/sources/ai-working-principles-karpathy]]
+- [[wiki/sources/my-2nd-brain-getting-started]]
 
 ## Views
 
