@@ -12,6 +12,13 @@ configuration:
     - private
     - templates
     - .obsidian
+    - raw
+    - conversations
+    - .lint
+    - .claude
+    - CLAUDE.md
+    - AGENTS.md
+    - inbox.md
   defaultDateType: created
   theme:
     fontOrigin: googleFonts
