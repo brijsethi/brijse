@@ -19,3 +19,7 @@ Catalog of the vault. Updated on every write operation.
 ## Views
 
 <!-- Timelines, comparisons, slides, etc. -->
+
+## Control files
+
+- [[wiki/path]] — learning-path queue (what to consume next, curator-maintained)

@@ -1,7 +1,7 @@
-last_lint: 2026-07-03
+last_lint: 2026-07-04
 ingests_since_last_lint: 0
-last_exit_code: 0
-last_findings_count: 0
-blocking: 0
+last_exit_code: 1
+last_findings_count: 1
+blocking: 1
 important: 0
 advisory: 0

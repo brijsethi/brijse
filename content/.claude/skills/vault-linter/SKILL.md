@@ -1,6 +1,6 @@
 ---
 name: vault-linter
-description: Runs deterministic health checks on a second brain wiki vault (dead links, orphan pages, duplicates, missing metadata, inconsistent naming, stale sources, gaps, view staleness, missing cross-references) and writes a report to .lint/report.md. Use this skill when the user says "lint", "check the vault", "vault health", "find broken links". Also run periodically — triggered when 5+ ingests have occurred since last lint OR 7+ days have passed. Supports unattended mode via --unattended flag. Fast, no LLM tokens consumed.
+description: Runs deterministic health checks on a second brain wiki vault (dead links, orphan pages, duplicates, missing metadata, inconsistent naming, stale sources, gaps, view staleness, missing cross-references, path make-hooks) and writes a report to .lint/report.md. Use this skill when the user says "lint", "check the vault", "vault health", "find broken links". Also run periodically — triggered when 5+ ingests have occurred since last lint OR 7+ days have passed. Supports unattended mode via --unattended flag. Fast, no LLM tokens consumed.
 ---
 
 # Vault Linter
@@ -18,7 +18,7 @@ zero LLM tokens.
 
 ## What it checks
 
-Nine deterministic checks. Each produces findings with concrete paths.
+Ten deterministic checks. Each produces findings with concrete paths.
 
 | # | Check | What it catches |
 |---|---|---|
@@ -31,6 +31,7 @@ Nine deterministic checks. Each produces findings with concrete paths.
 | 7 | **Gaps** | Concept names in prose without a corresponding page |
 | 8 | **View staleness** | Evolving views (`shareable: false`) whose `based_on` pages changed more than 30 days after |
 | 9 | **Missing cross-references** | Source pages citing a page in prose without a link |
+| 10 | **Path make-hooks** | Items under `Now`/`Next` in `path.md` with no `make:` line |
 
 Checks 3, 5, 7, 9 are heuristic — they can produce false positives and
 are marked as advisory.

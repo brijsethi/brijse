@@ -566,6 +566,62 @@ def check_missing_cross_references(pages: dict[str, WikiPage]) -> list[Finding]:
     return findings
 
 
+def check_path_make_hooks(pages: dict[str, WikiPage]) -> list[Finding]:
+    """Every item under a track's `Now`/`Next` in path.md must declare a
+    `make:` hook (the artifact it feeds, or `make: foundation`). Items under
+    `Someday` and the audience sub-sections are exempt — those are raw backlog.
+    Deterministic; only flags real item bullets missing the line.
+    """
+    findings: list[Finding] = []
+    page = pages.get("wiki/path.md")
+    if page is None:
+        return findings
+
+    lines = page.body_text.splitlines()
+    n = len(lines)
+    current_tier: str | None = None  # "now" | "next" | "someday" | None
+    make_re = re.compile(r"\bmake:", re.IGNORECASE)
+    i = 0
+    while i < n:
+        line = lines[i]
+        heading = re.match(r"^(#{2,6})\s+(.*)", line)
+        if heading:
+            text = heading.group(2).strip().lower()
+            if text in ("now", "next", "someday"):
+                current_tier = text
+            elif heading.group(1) == "##":
+                # New top-level track/section resets tier context.
+                current_tier = None
+            i += 1
+            continue
+
+        # A real item bullet: dash, space, then content (not a bare "-" placeholder).
+        if re.match(r"^-\s+\S", line) and current_tier in ("now", "next"):
+            block = [line]
+            j = i + 1
+            while j < n:
+                nxt = lines[j]
+                # Continuation = indented, non-bullet line.
+                if re.match(r"^\s+\S", nxt) and not re.match(r"^\s*-\s", nxt):
+                    block.append(nxt)
+                    j += 1
+                else:
+                    break
+            if not any(make_re.search(b) for b in block):
+                findings.append(Finding(
+                    severity="important",
+                    check="path_make_hook",
+                    file="wiki/path.md",
+                    detail=f"item under '{current_tier}' has no `make:` hook: {line.strip()[:80]}",
+                    line=i + 1,
+                ))
+            i = j
+            continue
+        i += 1
+
+    return findings
+
+
 # --- Report -----------------------------------------------------------------
 
 def severity_rank(s: str) -> int:
@@ -664,6 +720,7 @@ def run_lint(vault: Path, quiet: bool = False) -> int:
         ("gaps", check_gaps),
         ("view_staleness", check_view_staleness),
         ("missing_cross_references", check_missing_cross_references),
+        ("path_make_hook", check_path_make_hooks),
     ]
 
     findings: list[Finding] = []

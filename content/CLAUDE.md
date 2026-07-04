@@ -18,6 +18,8 @@ inbox.md              URL queue — user adds URLs, you fetch them
 raw/                  Immutable sources. Never write here.
   papers/             PDFs
   web/<slug>/         Web articles converted to markdown
+  notes/              User-authored notes (e.g. from NotebookLM, manual writing) —
+                       not written by FETCH, but ingested the same as anything else in raw/
 wiki/                 Your domain
   pages/              All concepts, people, orgs, projects — one file each
   sources/            One file per source in raw/, with summary
@@ -26,13 +28,14 @@ wiki/                 Your domain
   hot.md              Where we left off, ~5-10 lines
   index.md            Catalog of the whole wiki
   log.md              Append-only log of operations
+  path.md             Learning-path queue — candidates to consume next, by track, curator-maintained
 conversations/        Transcripts saved with /save
 .lint/report.md       Latest lint output
 .claude/              Skills, commands, hooks (mechanisms, not content)
 ```
 
 Three directories under `wiki/`. Everything you write goes to one of
-them, plus `compass.md`, `hot.md`, `index.md`, `log.md`.
+them, plus `compass.md`, `hot.md`, `index.md`, `log.md`, `path.md`.
 
 ---
 
@@ -81,7 +84,7 @@ update it. When `shareable: false` (default), the view evolves.
 
 ---
 
-## Seven operations
+## Eight operations
 
 ### FETCH
 User says "process inbox" → run `inbox-fetcher` skill, which pulls
@@ -154,13 +157,35 @@ User says "lint" or auto-trigger after 5 ingests / 7 days → run
 frontmatter, naming consistency, view staleness). Output to
 `.lint/report.md`. Never auto-fix.
 
+### PATH
+The learning path lives in `wiki/path.md` — a queue of candidates to
+consume next, organized into tracks (Foundations; Applied — practice &
+projects; Teaching & positioning; Prerequisites, by audience), one layer
+above `inbox.md`. As curator you keep each track's `Next` ranked, and
+**every item under `Now`/`Next` carries a `make:` hook** — the artifact it
+feeds (post/slides/workshop/visual) or an honest `foundation` when it has
+no direct output yet. An item with no plausible `make:` is a side-trail —
+flag it, don't queue it.
+
+Committing an item flows it: `path.md → inbox.md → FETCH → raw/ → INGEST →
+wiki/`. INGEST notes may spawn new candidates back into `path.md`.
+
+**Weekly review** (same 7-day cadence as LINT): note what was consumed
+(new `wiki/sources/`), re-rank each `Next`, name any side-trail (weak or
+absent `make:`) so the user can cut it consciously, flag which
+Prerequisites sub-thread is filling up (an audience signal), and update
+`Last reviewed` in `path.md`. The `make:` hook is enforced deterministically
+by `vault-linter` (check `path_make_hook`).
+
 ---
 
 ## Hot cache
 
 At session end, if we touched meaningful content, update `wiki/hot.md`
 with 5-10 lines on what we covered, what's open, what to pick up next.
-Don't add — replace. At session start, read `wiki/hot.md` first.
+Don't add — replace. At session start, read `wiki/hot.md` first. Also
+check `wiki/path.md`'s **Last reviewed** date; if it's ≥7 days ago (or
+"never" and the path has items), offer the weekly path review (see PATH).
 
 ---
 
