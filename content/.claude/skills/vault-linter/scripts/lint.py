@@ -267,8 +267,16 @@ def load_wiki(vault: Path) -> dict[str, WikiPage]:
             body_text=body,
         )
 
-        # Extract outgoing links with line numbers
+        # Extract outgoing links with line numbers, skipping fenced code blocks
+        # (```...```) — wikilinks inside code fences are literal text, not links,
+        # exactly as Quartz itself renders them.
+        in_fence = False
         for line_no, line in enumerate(body.splitlines(), start=1):
+            if line.lstrip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            if in_fence:
+                continue
             for m in WIKILINK_RE.finditer(line):
                 target = m.group(1)
                 page.outgoing_links.append((target, line_no))
